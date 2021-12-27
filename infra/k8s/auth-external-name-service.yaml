@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-external-name-service
+  namespace: nvg-cdp-ingress
+spec:
+  type: ExternalName
+  externalName: auth-cluster-ip-service.nvg-cdp
+  ports:
+  - port: 9000

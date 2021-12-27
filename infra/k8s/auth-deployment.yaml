@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-deployment
+  namespace: nvg-cdp
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      component: auth
+  template:
+    metadata:
+      labels:
+        component: auth
+    spec:
+      containers:
+        - name: auth
+          image: pedro357bm/cdp-auth
+          ports:
+            - containerPort: 9000
+          env:
+            - name: DEBUG
+              value: '0'
+            - name: HOSTS
+              value: kylo-ren-3f10f1910b7ec0b1bd973da20db66b8f-0000.us-south.containers.appdomain.cloud
+            - name: IMPERSONATION_URL
+              value: https://kylo-ren-3f10f1910b7ec0b1bd973da20db66b8f-0000.us-south.containers.appdomain.cloud/impersonate-user
+            - name: KAFKA_HOST
+              value: my-cluster-kafka-bootstrap.kafka:9092
+            - name: PGUSER
+              value: postgres
+            - name: PGHOST
+              value: postgres-cluster-ip-service
+            - name: PGPORT
+              value: '5432'
+            - name: PGDATABASE
+              value: postgres
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pgpassword
+                  key: PGPASSWORD
+            - name: SECRET_JWT
+              valueFrom:
+                secretKeyRef:
+                  name: secretjwt
+                  key: SECRET_JWT
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-cluster-ip-service
+  namespace: nvg-cdp
+spec:
+  type: ClusterIP
+  selector:
+    component: auth
+  ports:
+    - port: 9000
+      targetPort: 9000

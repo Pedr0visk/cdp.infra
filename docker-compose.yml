@@ -1,0 +1,105 @@
+version: "3.7"
+
+services:
+  mongo:
+    container_name: navegg-mongo
+    image: mongo:latest
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+      - navegg_data:/data/db
+
+  api:
+    container_name: navegg-api
+    command: python manage.py runserver 0.0.0.0:8000
+    build:
+      context: ./server
+      dockerfile: Dockerfile.dev
+    volumes:
+      - navegg_static_data:/vol/static
+      - ./server:/usr/src/app
+    env_file:
+      - ./server/.env.dev
+    depends_on:
+      - mongo
+    ports:
+      - 8000:8000
+
+  postgres:
+    container_name: navegg-postgres
+    image: 'postgres:13.4'
+    environment:
+      - POSTGRES_PASSWORD=postgres_password
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=admin
+    ports:
+      - '5432:5432'
+    volumes:
+      - navegg_postgres_auth:/var/lib/postgresql/data/
+
+  auth:
+    container_name: navegg-auth
+    build:
+      context: ./auth
+      dockerfile: Dockerfile.dev
+    command: sh -c "python manage.py runserver 0.0.0.0:9000"
+    volumes:
+      - ./auth:/usr/src/app
+    ports:
+      - 9000:9000
+    env_file:
+      - ./auth/.env.dev
+    depends_on:
+      - postgres
+
+  nginx:
+    container_name: navegg-proxy
+    depends_on:
+      - api
+    restart: always
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./nginx
+    ports:
+      - "3050:80"
+      - "8888:8888"
+
+  redis:
+    container_name: navegg-cache
+    image: redis
+    ports:
+      - 6379:6379
+
+  customers:
+    container_name: navegg-customers
+    build:
+      dockerfile: Dockerfile
+      context: ./customers
+    ports:
+      - 42078:42078
+    volumes:
+      - /app/node_modules
+      - ./customers:/app
+    depends_on:
+      - mongo
+    env_file:
+      - ./customers/.env
+
+  mailer:
+    container_name: navegg-mailer
+    build:
+      dockerfile: Dockerfile
+      context: ./mailer
+    volumes:
+      - /app/node_modules
+      - ./mailer:/app
+    env_file:
+      - ./mailer/.env
+      
+volumes:
+  navegg_data:
+  navegg_static_data:
+  navegg_postgres_auth:
+  navegg_zookeeper_data:
+  navegg_kafka_data:

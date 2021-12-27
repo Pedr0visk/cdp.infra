@@ -1,0 +1,41 @@
+{
+    "account_id": "1",
+    "customer_id": {
+        "type": "email",
+        "id": "jonh.doe@example.com"
+    },
+    "attributes": {
+        "email": "jonh.doe@example.com",
+        "name": "Jonh Doe"
+    },
+    "demographic": {
+        "age": {
+            "lang": {
+                "pt": "35-59",
+                "es": "35-59",
+                "en": "3559"
+            }
+        },
+        "gender": {
+            "lang": {
+                "pt": "Homens",
+                "es": "Hombres",
+                "en": "Male"
+            }
+        }
+    },
+    "products": [],
+    "brands": [],
+    "everybuyer": [],
+    "everyone": [],
+    "interests": [
+        {
+            "id": "259",
+            "lang": {
+                "pt": "Automobilismo",
+                "es": "Automovilismo",
+                "en": "Motoring"
+            }
+        }
+    ]
+}

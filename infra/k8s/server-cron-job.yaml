@@ -1,0 +1,56 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: server-cron-job
+  namespace: nvg-cdp
+spec:
+  schedule: "*/1 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: server
+            image: pedro357bm/cdp-server:c36e6feef266c9ae3e9c3b7726a4cfd1ad6be395
+            command:
+              - /bin/sh
+              - -c
+              - python manage.py updatecustomers
+            volumeMounts:
+              - name: server-ssh-secret
+                mountPath: /app/secret
+                readOnly: true
+            env:
+              - name: DOCKER
+                value: "1"
+              - name: DEBUG
+                value: "0"
+              - name: REDIS_HOST
+                value: redis-cluster-ip-service
+              - name: MICROSERVICE_HOST
+                value: http://dalva.nvg.im:9998
+              - name: DATABASE_HOST
+                value: 1117642f-6e8b-4841-9063-bca3ffa77aef-0.d7deeff0d58745aba57fa5c84685d5b4.databases.appdomain.cloud:30361,1117642f-6e8b-4841-9063-bca3ffa77aef-1.d7deeff0d58745aba57fa5c84685d5b4.databases.appdomain.cloud:30361,1117642f-6e8b-4841-9063-bca3ffa77aef-2.d7deeff0d58745aba57fa5c84685d5b4.databases.appdomain.cloud:30361
+              - name: DATABASE_PORT
+                value: "30361"
+              - name: DATABASE_USERNAME
+                value: ibm_cloud_a68200ea_7011_4e32_a38d_94337eb9331c
+              - name: DATABASE_ENGINE
+                value: djongo
+              - name: DATABASE_NAME
+                value: cdpdb
+              - name: DATABASE_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: mongodb-secret
+                    key: password
+              - name: SECRET_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: django-secret-key
+                    key: secretkey
+          volumes:
+            - name: server-ssh-secret
+              secret:
+                secretName: mongodb-cacert-pem

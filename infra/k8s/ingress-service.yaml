@@ -1,0 +1,79 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cdp-ingress
+  namespace: nvg-cdp
+  # uncomment this line to rewrite /api/ -> /
+  annotations: 
+    cert-manager.io/cluster-issuer: 'letsencrypt-prod'
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+    # nginx.ingress.kubernetes.io/rewrite-target: /
+    # nginx.ingress.kubernetes.io/use-regex: 'true'
+spec:
+  tls:
+    - hosts:
+      - kylo-ren-3f10f1910b7ec0b1bd973da20db66b8f-0000.us-south.containers.appdomain.cloud
+      secretName: kylo-ren-3f10f1910b7ec0b1bd973da20db66b8f-0000.us-south.containers.appdomain-cloud
+  rules:
+  - host: kylo-ren-3f10f1910b7ec0b1bd973da20db66b8f-0000.us-south.containers.appdomain.cloud
+    http:
+      paths:
+      - path: /api/users/
+        pathType: Prefix
+        backend:
+          service:
+            name: auth-cluster-ip-service
+            port:
+              number: 9000
+      - path: /api/
+        pathType: Prefix
+        backend:
+          service:
+            name: server-cluster-ip-service
+            port:
+              number: 8000
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: client-cluster-ip-service
+            port:
+              number: 5000
+      - path: /grafana
+        pathType: Prefix
+        backend:
+          service:
+            name: grafana-external-name-service
+            port:
+              number: 80
+      - path: /api/users/_search
+        pathType: Prefix
+        backend:
+          service:
+            name: customers-cluster-ip-service
+            port:
+              number: 42078
+  - host: cdp.navegg.com
+    http:
+      paths:
+      - path: /api/users/
+        pathType: Prefix
+        backend:
+          service:
+            name: auth-cluster-ip-service
+            port:
+              number: 9000
+      - path: /api/
+        pathType: Prefix
+        backend:
+          service:
+            name: server-cluster-ip-service
+            port:
+              number: 8000
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: client-cluster-ip-service
+            port:
+              number: 5000

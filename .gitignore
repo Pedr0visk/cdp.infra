@@ -1,0 +1,13 @@
+prototype/
+.DS_STORE
+
+auth/
+client/
+common/
+server/
+consumer/
+customers/
+mailer/
+producer/
+server/
+worker/

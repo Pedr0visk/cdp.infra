@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server-deployment
+  namespace: nvg-cdp
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      component: server
+  template:
+    metadata:
+      labels:
+        component: server
+    spec:
+      containers:
+        - name: server
+          image: us.icr.io/naveggcdp/cdp-server
+          ports:
+            - containerPort: 8000
+          volumeMounts:
+            - name: server-ssh-secret
+              mountPath: /app/secret
+              readOnly: true
+          resources:
+            requests:
+              cpu: "600m"
+              memory: "600Mi"
+            limits:
+              cpu: "650m"
+              memory: "650Mi"
+          env:
+            - name: SECRET_JWT
+              valueFrom:
+                secretKeyRef:
+                  name: secretjwt
+                  key: SECRET_JWT
+            - name: DOCKER
+              value: "1"
+            - name: DEBUG
+              value: "0"
+            - name: REDIS_HOST
+              value: redis-cluster-ip-service
+            - name: MICROSERVICE_HOST
+              value: http://dalva.nvg.im:9998
+            - name: DATABASE_HOST
+              value: 1117642f-6e8b-4841-9063-bca3ffa77aef-0.d7deeff0d58745aba57fa5c84685d5b4.databases.appdomain.cloud:30361,1117642f-6e8b-4841-9063-bca3ffa77aef-1.d7deeff0d58745aba57fa5c84685d5b4.databases.appdomain.cloud:30361,1117642f-6e8b-4841-9063-bca3ffa77aef-2.d7deeff0d58745aba57fa5c84685d5b4.databases.appdomain.cloud:30361
+            - name: KAFKA_BROKERS
+              value: my-cluster-kafka-bootstrap.kafka:9092
+            - name: DATABASE_PORT
+              value: "30361"
+            - name: DATABASE_USERNAME
+              value: ibm_cloud_a68200ea_7011_4e32_a38d_94337eb9331c
+            - name: DATABASE_ENGINE
+              value: djongo
+            - name: DATABASE_NAME
+              value: cdpdb
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-secret
+                  key: password
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: django-secret-key
+                  key: secretkey
+      volumes:
+        - name: server-ssh-secret
+          secret:
+            secretName: mongodb-cacert-pem

@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: client-deployment
+  namespace: nvg-cdp
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      component: web
+  template:
+    metadata:
+      labels:
+        component: web
+    spec:
+      containers:
+        - name: client
+          image: pedro357bm/cdp-client
+          ports:
+            - containerPort: 3000
+          env:
+            - name: HOSTNAME
+              value: bulma-b3c-4x16-3f10f1910b7ec0b1bd973da20db66b8f-0000.us-south.containers.appdomain.cloud
+            - name: HOST
+              value: http://$HOSTNAME
+          

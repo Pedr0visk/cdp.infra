@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admin-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: web
+  template:
+    metadata:
+      labels:
+        component: web
+    spec:
+      containers:
+        - name: admin
+          image: icr.io/naveggcdp/cdp-admin:12dbe912f3f1f4810756074f57f63abc1302a0ec
+          env:
+            - name: REACT_APP_SERVER_URL
+              value: https://cdp.navegg.com/api/
+          ports:
+            - containerPort: 4000
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "80Mi"
+            limits:
+              cpu: "120m"
+              memory: "100Mi"
